@@ -1,0 +1,2 @@
+CREATE DATABASE demo;
+CREATE TABLE demo.demo (data TEXT);

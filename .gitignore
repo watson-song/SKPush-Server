@@ -1,0 +1,16 @@
+*.class
+*.log
+.*
+
+!.gitignore
+!.travis.yml
+
+# sbt specific
+dist/*
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+project/*-shim.sbt
+
