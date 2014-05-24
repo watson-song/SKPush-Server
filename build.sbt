@@ -1,3 +1,5 @@
+import com.typesafe.startscript.StartScriptPlugin
+
 name := """tcp-async"""
 
 version := "1.0"
@@ -29,3 +31,5 @@ libraryDependencies ++= Seq(
 seq(ScctPlugin.instrumentSettings : _*)
 
 seq(com.github.theon.coveralls.CoverallsPlugin.coverallsSettings: _*)
+
+seq(StartScriptPlugin.startScriptForClassesSettings: _*)
