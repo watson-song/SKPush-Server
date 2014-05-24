@@ -1,6 +1,7 @@
 package util
 
 import com.typesafe.config.ConfigFactory
+import scala.util.Properties
 
 object Conf {
 
@@ -8,7 +9,9 @@ object Conf {
   config.checkValid(ConfigFactory.defaultReference)
 
   val appHostName = config.getString("tcp-async.app.hostname")
-  val appPort = config.getInt("tcp-async.app.port")
+  val port = Properties.envOrElse("PORT", "8080").toInt
+  println("Starting on port:"+port)
+  val appPort = port//config.getInt("tcp-async.app.port")
 
   val apiUrl = config.getString("tcp-async.api.url")
 
