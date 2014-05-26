@@ -17,6 +17,9 @@ import db.DB
 import play.api.libs.json.JsString
 import play.api.libs.json.JsValue
 import play.api.libs.json.Json
+import java.util.UUID
+import play.api.libs.json.JsObject
+import play.api.libs.json.JsNumber
 
 trait HandlerProps {
   def props(connection: ActorRef): Props
@@ -26,7 +29,12 @@ trait HandlerProps {
  * case class PushEvent 
  * Push data to specific tag group of the tcp connection
  */
-case class PushEvent(tags: Seq[JsValue], data: JsValue)
+case class PushEvent(tags: Seq[JsValue], data: JsObject)
+/**
+ * case class TransferMessageEvent 
+ * Transfer data to specific tcp connection client
+ */
+case class TransferMessageEvent(data: JsObject)
 /**
  * case class BindIDEvent
  * Bind the id to the specific connection when the device first connected
@@ -41,9 +49,9 @@ case class BindTagsEvent(tags: List[String])
 abstract class Handler(val connection: ActorRef) extends Actor with ActorLogging with DB{
   /*** Group the connections, useful when push msg to specify group*/
   var mTags: Seq[JsValue] = List(JsString("global"))
-  var mId: String = ""
+  var mId: String = self.path.name
 
-  val COMMAND = "^:((?i)[a-zA-Z0-9_]+)(\\s*->\\s*([\\{\\s\\S\\}]*)){0,1}$".r("cmd", "datagroup", "data")
+  val COMMAND = "^:((?i)[a-zA-Z0-9_]+)(\\s*->\\s*([\\s\\S]*)){0,1}$".r("cmd", "datagroup", "data")
 
   def receive: Receive = {
     case Received(source) =>
@@ -75,16 +83,28 @@ abstract class Handler(val connection: ActorRef) extends Actor with ActorLogging
       
     case PushEvent(tags, data) => 
       push(tags, data)
+    case TransferMessageEvent(data) => 
+      transfer(data)
   }
 
   def received(str: String): Unit
   def receivedCommand(cmd: String, data: Option[JsValue]): Unit
 
-  def push(tags: Seq[JsValue], data: JsValue) {
+  def push(tags: Seq[JsValue], data: JsObject) {
     log.info("my tags = "+mTags+", push tags="+tags+", data="+data)
     mTags.find(tag => tags.exists(_ == tag)).map(_ => {
+        //TODO write the msg to db
     	connection ! Write(ByteString(data.toString + "\n"))
     })
+  }
+  def transfer(data: JsObject) {
+    log.info("transfer message "+data);
+    //TODO write the msg to db
+    connection ! Write(ByteString(data.toString+"\n"))
+  }
+  
+  def wrap(data: JsObject):JsObject = {
+    data.+("from", JsString(mId)).+("timestamp", JsNumber(System.currentTimeMillis()))
   }
   
   def peerClosed() {

@@ -1,6 +1,6 @@
 import com.typesafe.startscript.StartScriptPlugin
 
-name := """tcp-async"""
+name := """ScalaPush"""
 
 version := "1.0"
 

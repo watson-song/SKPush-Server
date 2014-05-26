@@ -5,17 +5,25 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
+import play.api.libs.json.JsString;
+import play.api.libs.json.JsValue;
+import play.api.libs.json.Json;
+
 public class TestTcpServer {
 
 	public static void main(String[] args) {
-		for (int i = 0; i < 2000; i++) {
-			final int j = i;
-			new Thread("Thread-" + i) {
-				public void run() {
-					new TestTcpServer().startNewClient(j);
-				};
-			}.start();
-		}
+		JsValue a = Json.parse("\"bind\"");
+		System.out.println("bind json "+a);
+		a = new JsString("1");
+		System.out.println("bind json "+a);
+//		for (int i = 0; i < 2000; i++) {
+//			final int j = i;
+//			new Thread("Thread-" + i) {
+//				public void run() {
+//					new TestTcpServer().startNewClient(j);
+//				};
+//			}.start();
+//		}
 	}
 
 	private void startNewClient(int i) {

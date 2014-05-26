@@ -1,5 +1,6 @@
 package handler
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import akka.actor.ActorRef
 import akka.actor.ActorSelection.toScala
 import akka.actor.Props
@@ -13,12 +14,17 @@ import play.api.libs.json.JsArray
 import play.api.libs.json.JsUndefined
 import play.api.libs.json.JsArray
 import play.api.libs.json.JsString
+import api.Api
+import spray.http.HttpMethod
+import spray.http.HttpMethod
+import spray.http.HttpMethods
 
 object TcpConnectionHandlerProps extends HandlerProps {
   def props(connection: ActorRef) = Props(classOf[TcpConnectionHandler], connection)
 }
 
 class TcpConnectionHandler(connection: ActorRef) extends Handler(connection) {
+  val HEARTBEAT = ByteString("0x1OK#\n");
 
   /**
    * Push the incoming message to all clients.
@@ -33,21 +39,27 @@ class TcpConnectionHandler(connection: ActorRef) extends Handler(connection) {
     	  data.map(jsonData => {
     		jsonData\("tags") match {
     		  case JsArray(array) => {
-    	    	  val start = System.currentTimeMillis() 
-    			  context.actorSelection("../*") ! PushEvent(array, jsonData \ ("data"))
-    			  log.info("done to push msg("+jsonData \ ("data")+") to "+array+", use "+(System.currentTimeMillis() - start)+"ms")
+    			  context.actorSelection("../*") ! PushEvent(array, wrap(jsonData.as[JsObject].-("tags")))
     		  }
 			  case _ => log.error("wrong push command, data => "+data)
 			}
     	  })
           
         case Constants.COMMAND_HEARTBEAT_IDLE => 
-          log.info("heartbeat idle")
-          connection ! Write(ByteString("1\n"))
+          connection ! Write(HEARTBEAT)
         case Constants.COMMAND_HEARTBEAT_BUSY => 
-          log.info("heartbeat busy")
-          connection ! Write(ByteString("1\n"))
+          connection ! Write(HEARTBEAT)
+          
         case Constants.COMMAND_API_CALL => 
+          data.map(jsonData => {
+            jsonData\("uri") match {
+              case JsString(uri) => 
+	              Api.httpRequest(method = HttpMethods.GET, uri = uri) map {
+	            	  response => connection ! Write(ByteString(response.entity.asString.replaceAll("\n", "") + "\n"))
+	              }
+              case _ =>
+            }
+          })
           log.info("api call => "+data)
         case Constants.COMMAND_BIND_ID => 
           log.info("bind id => "+data)
@@ -78,7 +90,18 @@ class TcpConnectionHandler(connection: ActorRef) extends Handler(connection) {
           closed()
           stop()
         case Constants.COMMAND_TRANSFER_MSG => 
+          data.map(jsonData => {
+    		jsonData\("to") match {
+    		  case JsString(to) => {
+    		      //TODO lookup the specific connection id for device id(mId) from db
+    		      val connectionId = to //fake connection id
+    			  context.actorSelection("../"+connectionId) ! TransferMessageEvent(wrap(jsonData.as[JsObject].-("to")))
+    		  }
+			  case _ => log.error("wrong transfer message command, data => "+data)
+			}
+    	  })
           log.info("transfer msg => "+data)
+          
         case unknowCommand => 
           log.error("unknow command => "+unknowCommand)
       }
