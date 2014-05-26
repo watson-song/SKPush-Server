@@ -8,6 +8,8 @@ import util.Conf
 import akka.io.Tcp.Write
 import akka.actor.{ Props, ActorRef }
 import java.net.InetSocketAddress
+import scala.util.parsing.json.JSONObject
+import play.api.libs.json.JsValue
 
 object ApiHandlerProps extends HandlerProps {
   def props(connection: ActorRef) = Props(classOf[ApiHandler], connection)
@@ -27,7 +29,7 @@ class ApiHandler(connection: ActorRef) extends Handler(connection) {
     }
   }
   
-  override def receivedCommand(cmd: String, data: String) = {
+  override def receivedCommand(cmd: String, data: Option[JsValue]) = {
   }
 
   /**

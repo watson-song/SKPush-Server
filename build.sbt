@@ -16,6 +16,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-testkit" % "2.2.0",
   "com.github.mauricio" %% "mysql-async" % "0.2.6",
   "com.typesafe" % "config" % "1.0.2",
+  "com.typesafe.play" %% "play-json" % "2.2.1",
   "org.scalatest" % "scalatest_2.10" % "1.9.1" % "test",
   "org.mockito" % "mockito-core" % "1.9.5" % "test",
   "io.spray" % "spray-can" % "1.2-20130912",

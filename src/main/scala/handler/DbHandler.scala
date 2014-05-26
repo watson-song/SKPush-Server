@@ -8,6 +8,8 @@ import akka.io.Tcp.Write
 import akka.actor.{ Props, ActorRef }
 import scala.concurrent.ExecutionContext.Implicits.global
 import java.net.InetSocketAddress
+import scala.util.parsing.json.JSONObject
+import play.api.libs.json.JsValue
 
 object DbHandlerProps extends HandlerProps {
   def props(connection: ActorRef) = Props(classOf[DbHandler], connection)
@@ -23,7 +25,7 @@ class DbHandler(connection: ActorRef) extends Handler(connection) with DB {
     execute("INSERT INTO demo VALUES (?)", data + "--" + new Date).foreach(_ => printAll())
   }
   
-  override def receivedCommand(cmd: String, data: String) = {
+  override def receivedCommand(cmd: String, data: Option[JsValue]) = {
   }
 
   /**

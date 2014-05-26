@@ -9,9 +9,7 @@ object Conf {
   config.checkValid(ConfigFactory.defaultReference)
 
   val appHostName = config.getString("tcp-async.app.hostname")
-  val port = Properties.envOrElse("PORT", "8080").toInt
-  println("Starting on port:"+port)
-  val appPort = port//config.getInt("tcp-async.app.port")
+  val appPort = Properties.envOrElse("PORT", config.getString("tcp-async.app.port")).toInt
 
   val apiUrl = config.getString("tcp-async.api.url")
 
