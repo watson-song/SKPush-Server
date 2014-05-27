@@ -18,6 +18,6 @@ class EchoHandler(connection: ActorRef) extends Handler(connection) {
    */
   def received(data: String) = connection ! Write(ByteString(data + "\n"))
   
-  override def receivedCommand(cmd: String, data: Option[JsValue]) = {
+  override def receivedCommand(cmd: Int, data: Option[JsValue]) = {
   }
 }

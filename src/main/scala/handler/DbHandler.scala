@@ -25,7 +25,7 @@ class DbHandler(connection: ActorRef) extends Handler(connection) with DB {
     execute("INSERT INTO demo VALUES (?)", data + "--" + new Date).foreach(_ => printAll())
   }
   
-  override def receivedCommand(cmd: String, data: Option[JsValue]) = {
+  override def receivedCommand(cmd: Int, data: Option[JsValue]) = {
   }
 
   /**

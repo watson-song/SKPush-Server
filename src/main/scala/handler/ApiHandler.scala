@@ -29,7 +29,7 @@ class ApiHandler(connection: ActorRef) extends Handler(connection) {
     }
   }
   
-  override def receivedCommand(cmd: String, data: Option[JsValue]) = {
+  override def receivedCommand(cmd: Int, data: Option[JsValue]) = {
   }
 
   /**

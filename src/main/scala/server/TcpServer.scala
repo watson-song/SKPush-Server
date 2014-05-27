@@ -29,6 +29,7 @@ class TcpServer(handlerProps: HandlerProps) extends Server with ActorLogging {
     case Tcp.Connected(remote, local) =>
       val handler = context.actorOf(handlerProps.props(sender)/*, UUID.randomUUID().toString()*/)
       log.info("NewClientConnect => "+(remote.getHostName()+":"+remote.getPort())+", "+handler.path)
+      ServerChannelClassificationEventBus.subscribe(handler, "/") // put every connection to root event bus
       sender ! Tcp.Register(handler)
   }
 
