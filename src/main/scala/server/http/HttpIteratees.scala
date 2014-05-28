@@ -2,6 +2,9 @@ package server
 
 import akka.util.ByteString
 import akka.actor.IO
+import server.http.Request
+import server.http.HttpConstants
+import server.http.Header
 
 object HttpIteratees {
 	import HttpConstants._

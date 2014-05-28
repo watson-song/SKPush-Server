@@ -3,7 +3,7 @@ Scala-push
 
 What
 -----
-<i>Scals-push</i> is an lightwight push system which handles tcp requests reactively. 
+<i>Scala-push</i> is an lightwight push system which handles tcp requests reactively. 
 Support push message to group by tag, and each connection can have multiple tags
 
 

@@ -8,17 +8,17 @@ object Conf {
   val config = ConfigFactory.load
   config.checkValid(ConfigFactory.defaultReference)
 
-  val appHostName = config.getString("tcp-async.app.hostname")
-  val appPort = Properties.envOrElse("PORT", config.getString("tcp-async.app.port")).toInt
+  val appHostName = config.getString("spush.app.hostname")
+  val appPort = Properties.envOrElse("PORT", config.getString("spush.app.port")).toInt
 
-  val apiUrl = config.getString("tcp-async.api.url")
+  val apiUrl = config.getString("spush.api.url")
 
-  val dbUsername = config.getString("tcp-async.db.username")
-  val dbPassword = config.getString("tcp-async.db.password")
-  val dbPort = config.getInt("tcp-async.db.port")
-  val dbName = config.getString("tcp-async.db.name")
+  val dbUsername = config.getString("spush.db.username")
+  val dbPassword = config.getString("spush.db.password")
+  val dbPort = config.getInt("spush.db.port")
+  val dbName = config.getString("spush.db.name")
 
-  val dbPoolMaxObjects = config.getInt("tcp-async.db.pool.maxObjects")
-  val dbPoolMaxIdle = config.getInt("tcp-async.db.pool.maxIdle")
-  val dbPoolMaxQueueSize = config.getInt("tcp-async.db.pool.maxQueueSize")
+  val dbPoolMaxObjects = config.getInt("spush.db.pool.maxObjects")
+  val dbPoolMaxIdle = config.getInt("spush.db.pool.maxIdle")
+  val dbPoolMaxQueueSize = config.getInt("spush.db.pool.maxQueueSize")
 }

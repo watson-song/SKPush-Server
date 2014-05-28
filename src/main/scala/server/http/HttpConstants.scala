@@ -1,4 +1,4 @@
-package server
+package server.http
 
 import akka.util.ByteString
 

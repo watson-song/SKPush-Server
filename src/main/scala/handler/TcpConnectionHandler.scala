@@ -110,7 +110,10 @@ class TcpConnectionHandler(connection: ActorRef) extends Handler(connection) {
           log.error("unknow command => "+unknowCommand)
       }
   }
-    
+  
+  /***
+   * Bind id to specific tcp connection, after bind, every tcp connection can talk to each other
+   */
   def bindID(id: String) {
     mId = id
 	ServerChannelClassificationEventBus.subscribe(self, """/private/"""+id)
@@ -118,11 +121,19 @@ class TcpConnectionHandler(connection: ActorRef) extends Handler(connection) {
     //TODO initialize mTags information from DB if this id already registered
     log.info("bind id ->"+mId)
   }
+  
+  /***
+   * Bind tags if any connection interested in some tags content
+   */
   def bindTags(tags: Seq[JsValue]) {
     for(tag <- tags) ServerChannelClassificationEventBus.subscribe(self, """/group/"""+tag.as[JsString].value)
     connection ! Write(RESPONSE_BINDTAGS)
     log.info("bind tags ->"+tags)
   }
+  
+  /***
+   * Unbind tag when not interested anymore
+   */
   def unbindTag(tag: JsValue) {
     ServerChannelClassificationEventBus.unsubscribe(self, """/group/"""+tag.as[JsString].value)
     connection ! Write(RESPONSE_UNBINDTAG)

@@ -1,11 +1,10 @@
 package server
 
-import HttpConstants.CRLF
 import akka.util.ByteString
 import akka.util.ByteStringBuilder
+import server.http.HttpConstants.CRLF
 
 object OKResponse {
-  import HttpConstants.CRLF
  
   val okStatus = ByteString("HTTP/1.1 200 OK")
   val contentType = ByteString("Content-Type: text/html; charset=utf-8")
