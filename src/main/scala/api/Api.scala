@@ -20,13 +20,8 @@ class Api {
   //To be able to mock
   def sendAndReceive = sendReceive
 
-  def createHttpRequest(uri: String,
-    method: HttpMethod,
-    data: String) =
-
-    HttpRequest(method = method,
-      uri = uri,
-      entity = HttpEntity(data))
+  def createHttpRequest(uri: String, method: HttpMethod, data: String) =
+    HttpRequest(method = method, uri = uri, entity = HttpEntity(data))
 
   /**
    * Makes HTTP request
@@ -35,9 +30,7 @@ class Api {
    * @param method
    * @return
    */
-  def httpRequest(uri: String,
-    method: HttpMethod = GET,
-    data: String = "") = {
+  def httpRequest(uri: String, method: HttpMethod = GET, data: String = "") = {
     val pipeline = sendAndReceive
     pipeline {
       createHttpRequest(uri, method, data)

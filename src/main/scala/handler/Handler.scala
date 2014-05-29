@@ -1,5 +1,7 @@
 package handler
 
+import scala.math.BigDecimal.long2bigDecimal
+
 import akka.actor.Actor
 import akka.actor.ActorLogging
 import akka.actor.ActorRef
@@ -14,17 +16,13 @@ import akka.io.Tcp.Received
 import akka.io.Tcp.Write
 import akka.util.ByteString
 import db.DB
+import play.api.libs.json.JsNumber
+import play.api.libs.json.JsObject
 import play.api.libs.json.JsString
 import play.api.libs.json.JsValue
 import play.api.libs.json.Json
-import java.util.UUID
-import play.api.libs.json.JsObject
-import play.api.libs.json.JsNumber
-import server.MessageDispatchEvent
 import server.Message
-import server.ServerChannelClassificationEventBus
 import util.Constants
-import play.api.libs.json.JsObject
 
 trait HandlerProps {
   def props(connection: ActorRef): Props
@@ -85,8 +83,10 @@ abstract class Handler(val connection: ActorRef) extends Actor with ActorLogging
       aborted()
       stop()
       
-    case Message(id, data) => {
-      connection ! Write(toByteString(data).concat(ByteString("\n")))
+    case Message(id, sender, data) => {
+      if(sender != mId) {
+        connection ! Write(toByteString(data).concat(ByteString("\n")))
+      }
     }
   }
   

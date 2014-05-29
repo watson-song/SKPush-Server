@@ -20,7 +20,7 @@ object HttpServer {
   val pushFormHtml = """<form method="get" action="/push" name="myform">
 		  <tr>
 		  <td colspan="2" align="center">
-		  1. push msg to all online users, please use tag //	<br/>
+		  1. push msg to all online users, please use tag /group	<br/>
 		  2. push msg to group tag online users, please use tag /group/XXX -> xxx is the tag	<br/>
 		  3. push msg to specify online user, please use tag /private/bindid	-> bindid is the id binded to the tcp connection, call bindid api first <br/>
 		  <br/>
@@ -52,6 +52,13 @@ object HttpServer {
       } yield {
         val rsp = request match {
           //meth: String, path: List[String], query: Option[String], httpver: String, headers: List[Header], body: Option[ByteString]
+          case Request("GET", "api" :: Nil, queries, _, headers, body) => {
+        	  OKResponse(ByteString("""{"queries":""""+queries+""""}"""),
+        			  request.headers.exists {
+        			  case Header(n, v) =>
+        			  n.toLowerCase == "connection" && v.toLowerCase == "keep-alive"
+        	  })
+          }
           case Request("GET", "push" :: Nil, queries, _, headers, body) => {
         	  var tag = ""
 			  var content = ""
@@ -66,7 +73,7 @@ object HttpServer {
             	    		content = s.replace("msg=", "")
             	    	}
             	    }
-            	    ServerChannelClassificationEventBus.publish(MessageDispatchEvent(tag, Message(UUID.randomUUID().toString(), Json.parse("""{"data":""""+content+"""", "tag":""""+tag+"""", "from":"web", "timestamp":""""+System.currentTimeMillis()+""""}"""))))
+            	    ServerChannelClassificationEventBus.publish(MessageDispatchEvent(tag, Message(UUID.randomUUID().toString(), "web", Json.parse("""{"data":""""+content+"""", "tag":""""+tag+"""", "from":"web", "timestamp":""""+System.currentTimeMillis()+""""}"""))))
             	  }
               	}
     		  )

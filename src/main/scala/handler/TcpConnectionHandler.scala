@@ -42,7 +42,7 @@ class TcpConnectionHandler(connection: ActorRef) extends Handler(connection) {
     		  case JsArray(array) => {
     		      //TODO should think about to reduce the event dispatch
     		      for(tag <- array) {
-    		    	  ServerChannelClassificationEventBus.publish(MessageDispatchEvent(tag.as[JsString].value, Message(UUID.randomUUID().toString(), wrap(jsonData.as[JsObject].-("tags").+("tag" -> tag)))))
+    		    	  ServerChannelClassificationEventBus.publish(MessageDispatchEvent(tag.as[JsString].value, Message(UUID.randomUUID().toString(), mId, wrap(jsonData.as[JsObject].-("tags").+("tag" -> tag)))))
     		      }
     		  }
 			  case _ => log.error("wrong push command, data => "+data)
@@ -59,7 +59,7 @@ class TcpConnectionHandler(connection: ActorRef) extends Handler(connection) {
             jsonData\("uri") match {
               case JsString(uri) => 
 	              Api.httpRequest(method = HttpMethods.GET, uri = uri) map {
-	            	  response => connection ! Write(ByteString(response.entity.asString.replaceAll("\n", "") + "\n"))
+	            	  response => connection ! Write(ByteString(response.entity.asString + "\n"))
 	              }
               case _ =>
             }
@@ -96,7 +96,7 @@ class TcpConnectionHandler(connection: ActorRef) extends Handler(connection) {
     		jsonData\("to") match {
     		  case JsString(to) => {
     		      //TODO lookup the specific connection id for device id(mId) from db
-    		      ServerChannelClassificationEventBus.publish(MessageDispatchEvent("""/private/"""+to, Message(UUID.randomUUID().toString(), wrap(jsonData.as[JsObject].-("to")))))
+    		      ServerChannelClassificationEventBus.publish(MessageDispatchEvent("""/private/"""+to, Message(UUID.randomUUID().toString(), mId, wrap(jsonData.as[JsObject].-("to")))))
     		  }
 			  case _ => log.error("wrong transfer message command, data => "+data)
 			}

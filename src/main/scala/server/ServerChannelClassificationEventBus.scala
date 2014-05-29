@@ -13,7 +13,7 @@ import util.Constants
 /***
  * Message content for the push 
  */
-case class Message(val id: String, val data: JsValue)
+case class Message(val id: String, val sender: String, val data: JsValue)
 
 /***
  * Client will handle this event, for group and single messsage both
