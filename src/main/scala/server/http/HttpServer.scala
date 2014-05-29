@@ -66,7 +66,7 @@ object HttpServer {
             	    		content = s.replace("msg=", "")
             	    	}
             	    }
-            	    ServerChannelClassificationEventBus.publish(MessageDispatchEvent(JsString(tag).value, Message(UUID.randomUUID().toString(), Json.parse("""{"data":""""+content+"""", "from":"web", "timestamp":""""+System.currentTimeMillis()+""""}"""))))
+            	    ServerChannelClassificationEventBus.publish(MessageDispatchEvent(tag, Message(UUID.randomUUID().toString(), Json.parse("""{"data":""""+content+"""", "tag":""""+tag+"""", "from":"web", "timestamp":""""+System.currentTimeMillis()+""""}"""))))
             	  }
               	}
     		  )

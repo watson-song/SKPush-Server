@@ -13,17 +13,7 @@ import util.Constants
 /***
  * Message content for the push 
  */
-case class Message(val id: String, val data: JsValue) {
-  val byteArray = List[Byte]('%', '%', 1.toByte, 0.toByte,  (Constants.SKEP_COMMAND_MSG_PUSH_IN >>> 24).toByte, (Constants.SKEP_COMMAND_MSG_PUSH_IN >>> 16).toByte, (Constants.SKEP_COMMAND_MSG_PUSH_IN >>> 8).toByte, Constants.SKEP_COMMAND_MSG_PUSH_IN.toByte)
-  def toByteString(): ByteString = {
-    val dataByteArray = data.toString.getBytes()
-    ByteString((byteArray ::: intToByteArray(dataByteArray.length)).toArray).concat(ByteString(dataByteArray)).concat(ByteString(Array[Byte]('$','$')))
-  }
-  
-  def intToByteArray(value: Int): List[Byte] = {
-	List[Byte]((value >>> 24).toByte, (value >>> 16).toByte, (value >>> 8).toByte, value.toByte)
-  }
-}
+case class Message(val id: String, val data: JsValue)
 
 /***
  * Client will handle this event, for group and single messsage both

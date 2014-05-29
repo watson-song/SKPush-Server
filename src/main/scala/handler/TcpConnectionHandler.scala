@@ -18,17 +18,15 @@ import server.ServerChannelClassificationEventBus
 import spray.http.HttpMethods
 import util.Constants
 import java.util.UUID
+import play.api.libs.json.JsArray
+import play.api.libs.json.JsNumber
 
 object TcpConnectionHandlerProps extends HandlerProps {
   def props(connection: ActorRef) = Props(classOf[TcpConnectionHandler], connection)
 }
 
 class TcpConnectionHandler(connection: ActorRef) extends Handler(connection) {
-  val RESPONSE_HEARTBEAT = ByteString(Array[Byte]('%', '%', 1.toByte, 2.toByte, (Constants.SKEP_COMMAND_RESPONSE_HEARTBEAT >>> 24).toByte, (Constants.SKEP_COMMAND_RESPONSE_HEARTBEAT >>> 16).toByte, (Constants.SKEP_COMMAND_RESPONSE_HEARTBEAT >>> 8).toByte, Constants.SKEP_COMMAND_RESPONSE_HEARTBEAT.toByte, 0.toByte,0.toByte, 0.toByte, 0.toByte, '$', '$', '\n'));
-  val RESPONSE_BINDID = ByteString(Array[Byte]('%', '%', 1.toByte, 2.toByte, (Constants.SKEP_COMMAND_RESPONSE_BIND_ID >>> 24).toByte, (Constants.SKEP_COMMAND_RESPONSE_BIND_ID >>> 16).toByte, (Constants.SKEP_COMMAND_RESPONSE_BIND_ID >>> 8).toByte, Constants.SKEP_COMMAND_RESPONSE_BIND_ID.toByte, 0.toByte,0.toByte, 0.toByte, 0.toByte, '$', '$', '\n'));
-  val RESPONSE_BINDTAGS = ByteString(Array[Byte]('%', '%', 1.toByte, 2.toByte, (Constants.SKEP_COMMAND_RESPONSE_BIND_TAGS >>> 24).toByte, (Constants.SKEP_COMMAND_RESPONSE_BIND_TAGS >>> 16).toByte, (Constants.SKEP_COMMAND_RESPONSE_BIND_TAGS >>> 8).toByte, Constants.SKEP_COMMAND_RESPONSE_BIND_TAGS.toByte, 0.toByte,0.toByte, 0.toByte, 0.toByte, '$', '$', '\n'));
-  val RESPONSE_UNBINDTAG = ByteString(Array[Byte]('%', '%', 1.toByte, 2.toByte, (Constants.SKEP_COMMAND_RESPONSE_UNBIND_TAG >>> 24).toByte, (Constants.SKEP_COMMAND_RESPONSE_UNBIND_TAG >>> 16).toByte, (Constants.SKEP_COMMAND_RESPONSE_UNBIND_TAG >>> 8).toByte, Constants.SKEP_COMMAND_RESPONSE_UNBIND_TAG.toByte, 0.toByte,0.toByte, 0.toByte, 0.toByte, '$', '$', '\n'));
-
+  
   /**
    * Push the incoming message to all clients.
    */
@@ -42,10 +40,9 @@ class TcpConnectionHandler(connection: ActorRef) extends Handler(connection) {
     	  data.map(jsonData => {
     		jsonData\("tags") match {
     		  case JsArray(array) => {
-    		      val msg = Message(UUID.randomUUID().toString(), wrap(jsonData.as[JsObject].-("tags")))
     		      //TODO should think about to reduce the event dispatch
     		      for(tag <- array) {
-    		    	  ServerChannelClassificationEventBus.publish(MessageDispatchEvent(tag.as[JsString].value, msg))
+    		    	  ServerChannelClassificationEventBus.publish(MessageDispatchEvent(tag.as[JsString].value, Message(UUID.randomUUID().toString(), wrap(jsonData.as[JsObject].-("tags").+("tag" -> tag)))))
     		      }
     		  }
 			  case _ => log.error("wrong push command, data => "+data)
@@ -53,9 +50,9 @@ class TcpConnectionHandler(connection: ActorRef) extends Handler(connection) {
     	  })
           
         case Constants.SKEP_COMMAND_REQUEST_HEARTBEAT_IDLE => 
-          connection ! Write(RESPONSE_HEARTBEAT)
+          connection ! Write(Constants.RESPONSE_HEARTBEAT)
         case Constants.SKEP_COMMAND_REQUEST_HEARTBEAT_BUSY => 
-          connection ! Write(RESPONSE_HEARTBEAT)
+          connection ! Write(Constants.RESPONSE_HEARTBEAT)
           
         case Constants.SKEP_COMMAND_REQUEST_API_CALL => 
           data.map(jsonData => {
@@ -99,7 +96,7 @@ class TcpConnectionHandler(connection: ActorRef) extends Handler(connection) {
     		jsonData\("to") match {
     		  case JsString(to) => {
     		      //TODO lookup the specific connection id for device id(mId) from db
-    		      ServerChannelClassificationEventBus.publish(MessageDispatchEvent("""/private/"""+to, wrap(jsonData.as[JsObject].-("to"))))
+    		      ServerChannelClassificationEventBus.publish(MessageDispatchEvent("""/private/"""+to, Message(UUID.randomUUID().toString(), wrap(jsonData.as[JsObject].-("to")))))
     		  }
 			  case _ => log.error("wrong transfer message command, data => "+data)
 			}
@@ -117,7 +114,7 @@ class TcpConnectionHandler(connection: ActorRef) extends Handler(connection) {
   def bindID(id: String) {
     mId = id
 	ServerChannelClassificationEventBus.subscribe(self, """/private/"""+id)
-	connection ! Write(RESPONSE_BINDID)
+	connection ! Write(Constants.RESPONSE_BINDID)
     //TODO initialize mTags information from DB if this id already registered
     log.info("bind id ->"+mId)
   }
@@ -127,7 +124,7 @@ class TcpConnectionHandler(connection: ActorRef) extends Handler(connection) {
    */
   def bindTags(tags: Seq[JsValue]) {
     for(tag <- tags) ServerChannelClassificationEventBus.subscribe(self, """/group/"""+tag.as[JsString].value)
-    connection ! Write(RESPONSE_BINDTAGS)
+    connection ! Write(Constants.RESPONSE_BINDTAGS)
     log.info("bind tags ->"+tags)
   }
   
@@ -136,7 +133,7 @@ class TcpConnectionHandler(connection: ActorRef) extends Handler(connection) {
    */
   def unbindTag(tag: JsValue) {
     ServerChannelClassificationEventBus.unsubscribe(self, """/group/"""+tag.as[JsString].value)
-    connection ! Write(RESPONSE_UNBINDTAG)
+    connection ! Write(Constants.RESPONSE_UNBINDTAG)
     log.info("unbind tag ->"+tag)
   }
   

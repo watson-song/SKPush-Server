@@ -23,6 +23,8 @@ import play.api.libs.json.JsNumber
 import server.MessageDispatchEvent
 import server.Message
 import server.ServerChannelClassificationEventBus
+import util.Constants
+import play.api.libs.json.JsObject
 
 trait HandlerProps {
   def props(connection: ActorRef): Props
@@ -84,22 +86,23 @@ abstract class Handler(val connection: ActorRef) extends Actor with ActorLogging
       stop()
       
     case Message(id, data) => {
-      connection ! Write(new Message(id, data).toByteString.concat(ByteString("\n")))
+      connection ! Write(toByteString(data).concat(ByteString("\n")))
     }
-    case PushEvent(tag, msg) => {
-      ServerChannelClassificationEventBus.publish(MessageDispatchEvent(tag.as[JsString].value, msg))
-    }
-    case TransferMessageEvent(data) => 
-      transfer(data)
+  }
+  
+  def toByteString(data: JsValue): ByteString = {
+    val dataByteArray = data.toString.getBytes("utf-8")
+    ByteString((Constants.MESSAGE_PREFIX_DATA ::: intToByteArray(dataByteArray.length)).toArray).concat(ByteString(dataByteArray)).concat(ByteString(Array[Byte]('$','$')))
+  }
+  
+  def intToByteArray(value: Int): List[Byte] = {
+	List[Byte]((value >>> 24).toByte, (value >>> 16).toByte, (value >>> 8).toByte, value.toByte)
   }
   
   def byteArrayToInt(b: Array[Byte]): Integer = {
     b(3) & 0xFF | (b(2) & 0xFF) << 8 | (b(1) & 0xFF) << 16 |(b(0) & 0xFF) << 24;
   }
-  def intToByteArray(value: Int): Array[Byte] = {
-	Array[Byte]((value >>> 24).toByte, (value >>> 16).toByte, (value >>> 8).toByte, value.toByte)
-  }
-
+  
   def received(str: String): Unit
   def receivedCommand(cmd: Int, data: Option[JsValue]): Unit
 
@@ -158,12 +161,6 @@ abstract class Handler(val connection: ActorRef) extends Actor with ActorLogging
     }
     
     None
-  }
-  
-  def transfer(data: JsObject) {
-    log.info("transfer message "+data);
-    //TODO write the msg to db
-    connection ! Write(ByteString(data.toString+"\n"))
   }
   
   def wrap(data: JsObject):JsObject = {
