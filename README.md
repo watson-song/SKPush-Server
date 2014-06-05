@@ -1,6 +1,11 @@
 SKPush-Server
 =============
 
+Name
+-----
+SKPush is the name of Scala and Akka combination, and it's main work is push
+
+
 What
 -----
 <i>SKPush</i> is an lightwight push system which handles tcp requests reactively. 
