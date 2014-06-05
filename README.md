@@ -3,7 +3,7 @@ SKPush-Server
 
 What
 -----
-<i>Scala-push</i> is an lightwight push system which handles tcp requests reactively. 
+<i>SKPush</i> is an lightwight push system which handles tcp requests reactively. 
 Support push message to group by tag, and each connection can have multiple tags
 
 
@@ -27,4 +27,4 @@ With
 
 TODO
 -----
-* Each connection will handle each push message event one time, need to get ride of some events if not necessary
+* Actor Crash Handle
